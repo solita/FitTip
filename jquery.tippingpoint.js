@@ -1,8 +1,6 @@
-/*!
- * jQuery Tipping Point v0.1
- * Copyright 2012, Antti-Jussi Kovalainen
- * Licensed under MIT
- */
+// jQuery Tipping Point v0.1
+// Copyright (c) 2012 Solita Oy
+// Licensed under MIT
 
 (function ($, window, document, undefined) {
 
