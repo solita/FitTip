@@ -1,13 +1,13 @@
-// jQuery Tipping Point v0.1
-// Copyright (c) 2012 Solita Oy
-// Licensed under MIT
+// jQuery Tipping Point v0.2
+// Licensed under MIT. Copyright (c) 2012 Solita
 
 (function ($, window, document, undefined) {
 
 $.fn.tp = function (options_in) {
 
     var options = $.extend({
-        offset: 5      // tooltip offset
+        offset: 5,                      // tooltip offset
+        allowTitleChange: false         // Always read the "title" attribute, in-case it has changed
     }, options_in);
 
     var tooltip = $('<div id="tipping-point"><div class="tp-inner"></div><div class="tp-arrow"></div></div>');
@@ -20,8 +20,13 @@ $.fn.tp = function (options_in) {
         position: 'absolute',
         visibility: 'hidden'
     });
-    
+
     function showTooltip(x, y, text) {
+        // Don't show the tooltip if there is no text
+        if (options.allowTitleChange && $.trim(text) === '') {
+            return;
+        }
+
         tooltip_inner.html(text);
 
         $('body').append(tooltip);
@@ -43,9 +48,10 @@ $.fn.tp = function (options_in) {
 
     return this.each(function () {
         var $this = $(this),
-            title = $this.attr('title');
+            cachedTitle = $this.attr('title');
 
-        if ($.trim(title) === '') {
+        // Don't hook functions, if there is no title and we don't want to read it automatically on update
+        if (!options.allowTitleChange && $.trim(cachedTitle) === '') {
             return;
         }
 
@@ -54,12 +60,25 @@ $.fn.tp = function (options_in) {
                 x = pos.left,
                 y = pos.top;
 
-            showTooltip(x, y, title);
+            if (options.allowTitleChange) {
+                var updatedTitle = $this.attr('title');
+                if ($.trim(updatedTitle) !== '') {
+                    cachedTitle = updatedTitle;
+                    $this.attr('orig-title', cachedTitle);
+
+                    // Remove the title, so it doesn't show up on hover
+                    $this.removeAttr('title');
+                }
+            }
+
+            showTooltip(x, y, cachedTitle);
         }, function () {
             hideTooltip();
         });
 
-        $this.attr('orig-title', title);
+        $this.attr('orig-title', cachedTitle);
+
+        // Remove the title, so it doesn't show up on hover
         $this.removeAttr('title');
     });
 };
